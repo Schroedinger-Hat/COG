@@ -11,6 +11,8 @@ import (
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+
+	utils "cog/utils"
 )
 
 type model struct {
@@ -38,7 +40,7 @@ func newModel() model {
 	s := spinner.New()
 	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("63"))
 	return model{
-		issue:    GetIssue(),
+		issue:    utils.GetIssue(),
 		spinner:  s,
 		progress: p,
 	}
