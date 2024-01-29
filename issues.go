@@ -5,7 +5,7 @@ import (
 	"math/rand"
 )
 
-var packages = []string{
+var issues = []string{
 	"vegeutils",
 	"libgardening",
 	"currykit",
@@ -37,16 +37,16 @@ var packages = []string{
 	"libyuzu",
 }
 
-func GetPackages() []string {
-	pkgs := packages
-	copy(pkgs, packages)
+func GetIssue() []string {
+	workingIssues := issues
+	copy(workingIssues, issues)
 
-	rand.Shuffle(len(pkgs), func(i, j int) {
-		pkgs[i], pkgs[j] = pkgs[j], pkgs[i]
+	rand.Shuffle(len(workingIssues), func(i, j int) {
+		workingIssues[i], workingIssues[j] = workingIssues[j], workingIssues[i]
 	})
 
-	for k := range pkgs {
-		pkgs[k] += fmt.Sprintf("-%d.%d.%d", rand.Intn(10), rand.Intn(10), rand.Intn(10)) //nolint:gosec
+	for k := range workingIssues {
+		workingIssues[k] += fmt.Sprintf("-%d.%d.%d", rand.Intn(10), rand.Intn(10), rand.Intn(10)) //nolint:gosec
 	}
-	return pkgs
+	return workingIssues
 }
