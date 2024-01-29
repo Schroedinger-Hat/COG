@@ -1,12 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
-	"math/rand"
+	"net/http"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/spinner"
@@ -27,6 +27,9 @@ type model struct {
 }
 
 var csvFilePath string
+var githubUser string
+var githubRepository string
+var GHToken string
 
 var (
 	currentIssueNameStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("211"))
@@ -117,10 +120,36 @@ type createdIssueMsg string
 
 func parseAndCreate(issue utils.Issue) tea.Cmd {
 	// change with the creating of the issue
-	d := time.Millisecond * time.Duration(rand.Intn(500)) //nolint:gosec
-	return tea.Tick(d, func(t time.Time) tea.Msg {
-		return createdIssueMsg(issue.Name + ":" + issue.Description)
-	})
+	url := "https://api.github.com/repos/Wabri/tmp/issues"
+
+	title := "\"title\":\"" + issue.Name + "\""
+	description := "\"body\":\"" + issue.Description + "\""
+	payload := []byte("{" + title + "," + description + "}")
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(payload))
+	if err != nil {
+		fmt.Println("Error creating request:", err)
+		os.Exit(0)
+	}
+
+	req.Header.Set("Accept", "application/vnd.github+json")
+	req.Header.Set("Authorization", "Bearer "+GHToken)
+	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		fmt.Println("Error making request:", err)
+		os.Exit(0)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == 201 {
+		return func() tea.Msg {
+			return createdIssueMsg(issue.Name + ":" + issue.Description)
+		}
+	} else {
+		return nil
+	}
 }
 
 func max(a, b int) int {
@@ -131,10 +160,19 @@ func max(a, b int) int {
 }
 
 func main() {
+	envGHTokenName := "GHTOKEN"
+	envGHTokenValue, exists := os.LookupEnv(envGHTokenName)
+	if !exists {
+		fmt.Println("Environment variable " + envGHTokenName + " not set!")
+	}
+	GHToken = envGHTokenValue
+
 	flag.StringVar(&csvFilePath, "csv", "", "The path of the csv with all the infos about issues to create")
+	flag.StringVar(&githubUser, "gh-user", "", "The user of the repository where we want to create the issues")
+	flag.StringVar(&githubRepository, "gh-repository", "", "The repository where we want to create the issues")
 	flag.Parse()
-	if csvFilePath == "" {
-		fmt.Println("Error: you must pass a csv file!")
+	if csvFilePath == "" || githubRepository == "" || githubUser == "" {
+		fmt.Println("Error: you must pass all the arguments!")
 		os.Exit(0)
 	}
 
