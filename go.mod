@@ -1,4 +1,4 @@
-module main
+module cog
 
 go 1.20
 

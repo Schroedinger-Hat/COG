@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"math/rand"
 	"os"
@@ -16,7 +17,7 @@ import (
 )
 
 type model struct {
-	issue    []string
+	issues   []utils.Issue
 	index    int
 	width    int
 	height   int
@@ -24,6 +25,8 @@ type model struct {
 	progress progress.Model
 	done     bool
 }
+
+var csvFilePath string
 
 var (
 	currentIssueNameStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("211"))
@@ -40,14 +43,14 @@ func newModel() model {
 	s := spinner.New()
 	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("63"))
 	return model{
-		issue:    utils.GetIssue(),
+		issues:   utils.GetIssue(csvFilePath),
 		spinner:  s,
 		progress: p,
 	}
 }
 
 func (m model) Init() tea.Cmd {
-	return tea.Batch(parseAndCreate(m.issue[m.index]), m.spinner.Tick)
+	return tea.Batch(parseAndCreate(m.issues[m.index]), m.spinner.Tick)
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -60,18 +63,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 	case createdIssueMsg:
-		if m.index >= len(m.issue)-1 {
+		if m.index >= len(m.issues)-1 {
 			m.done = true
 			return m, tea.Quit
 		}
 
-		progressCmd := m.progress.SetPercent(float64(m.index) / float64(len(m.issue)-1))
+		progressCmd := m.progress.SetPercent(float64(m.index) / float64(len(m.issues)-1))
 
 		m.index++
 		return m, tea.Batch(
 			progressCmd,
-			tea.Printf("%s %s", checkMark, m.issue[m.index]), // print success message above our program
-			parseAndCreate(m.issue[m.index]),                 // create the next issue
+			tea.Printf("%s %s", checkMark, m.issues[m.index]), // print success message above our program
+			parseAndCreate(m.issues[m.index]),                 // create the next issue
 		)
 	case spinner.TickMsg:
 		var cmd tea.Cmd
@@ -88,35 +91,35 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	n := len(m.issue)
+	n := len(m.issues) - 1
 	w := lipgloss.Width(fmt.Sprintf("%d", n))
 
 	if m.done {
 		return doneStyle.Render(fmt.Sprintf("Done! Created %d Issue.\n", n))
 	}
 
-	issueCount := fmt.Sprintf(" %*d/%*d", w, m.index, w, n-1)
+	issuesCount := fmt.Sprintf(" %*d/%*d", w, m.index, w, n-1)
 
 	spin := m.spinner.View() + " "
 	prog := m.progress.View()
-	cellsAvail := max(0, m.width-lipgloss.Width(spin+prog+issueCount))
+	cellsAvail := max(0, m.width-lipgloss.Width(spin+prog+issuesCount))
 
-	pkgName := currentIssueNameStyle.Render(m.issue[m.index])
-	info := lipgloss.NewStyle().MaxWidth(cellsAvail).Render("Creating " + pkgName)
+	issueName := currentIssueNameStyle.Render(m.issues[m.index].Name)
+	info := lipgloss.NewStyle().MaxWidth(cellsAvail).Render("Creating " + issueName)
 
-	cellsRemaining := max(0, m.width-lipgloss.Width(spin+info+prog+issueCount))
+	cellsRemaining := max(0, m.width-lipgloss.Width(spin+info+prog+issuesCount))
 	gap := strings.Repeat(" ", cellsRemaining)
 
-	return spin + info + gap + prog + issueCount
+	return spin + info + gap + prog + issuesCount
 }
 
 type createdIssueMsg string
 
-func parseAndCreate(pkg string) tea.Cmd {
+func parseAndCreate(issue utils.Issue) tea.Cmd {
 	// change with the creating of the issue
 	d := time.Millisecond * time.Duration(rand.Intn(500)) //nolint:gosec
 	return tea.Tick(d, func(t time.Time) tea.Msg {
-		return createdIssueMsg(pkg)
+		return createdIssueMsg(issue.Name + ":" + issue.Description)
 	})
 }
 
@@ -128,6 +131,13 @@ func max(a, b int) int {
 }
 
 func main() {
+	flag.StringVar(&csvFilePath, "csv", "", "The path of the csv with all the infos about issues to create")
+	flag.Parse()
+	if csvFilePath == "" {
+		fmt.Println("Error: you must pass a csv file!")
+		os.Exit(0)
+	}
+
 	if _, err := tea.NewProgram(newModel()).Run(); err != nil {
 		fmt.Println("Error running program:", err)
 		os.Exit(1)
