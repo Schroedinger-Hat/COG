@@ -10,22 +10,20 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <h1>Template</h1>
+  <h1>COG</h1>
   
-  <a href="https://github.com/Schrodinger-Hat/template">
+  <a href="https://github.com/Schrodinger-Hat/cog">
     <img src="public/sh.png" alt="Logo" width="80" height="80">
   </a>
 
   <p align="center">
     <br />
-    <a href="https://github.com/Schrodinger-Hat/template/blob/main/README.md"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/Schrodinger-Hat/cog/blob/main/README.md"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://www.schrodinger-hat.it/">View Demo</a>
+    <a href="https://github.com/Schrodinger-Hat/COG/issues/new?assignees=&labels=bug&projects=&template=bug_report.yml">Report Bug</a>
     ·
-    <a href="https://github.com/Schrodinger-Hat/Template/issues">Report Bug</a>
-    ·
-    <a href="https://github.com/Schrodinger-Hat/Template/issues">Request Feature</a>
+    <a href="https://github.com/Schrodinger-Hat/COG/issues/new?assignees=&labels=feature+request%2Cneeds+discussion&projects=&template=feature_request.yml">Request Feature</a>
   </p>
 </div>
 
@@ -49,15 +47,35 @@
 
 ## About The Project
 
-Here goes the description
+This is a project that we use to automate issues creation for vote talks of [Open Source Day](osday.dev). We have the call for speakers on sessionize, where we can download a csv file with talk+speaker name and to let the community vote we need all of them into issues.
+
+The name *COG* is meant to lead back to the fact that this project is nothing more than a cog in a larger mechanism.
 
 ### Tech stack
 
-<!-- USAGE EXAMPLES -->
+The main language is [GO](https://go.dev/) and the main graphical library is [bubbletea](https://github.com/charmbracelet/bubbletea), nothing more.
 
 ## Usage
 
-<!-- CONTRIBUTING -->
+At the moment the fastest way to run this is to run:
+
+```bash
+go mod tidy
+export GHTOKEN=<your-token>
+go run main.go -csv <path-to-csv> -gh-user <user-repository> -gh-repository <repository>
+```
+
+The csv must have a similar structure of [this template](./template.csv):
+
+```csv
+name, description, labels
+issue name, issue description, good first issue; bug; question
+another issue name, another issue description, question
+```
+
+Is very important to split the labels with the separator *;* otherwise something unexpected might happen.
+
+Last thing, the most important one: you need a [Github Personal Access Token](https://github.com/settings/tokens) no specific scope are needed.
 
 ## Contributing
 
@@ -72,17 +90,17 @@ Don't forget to give the project a star! Thanks again!
 
 Schrödinger's Hat Team - [@schrodinger_hat](mailto:schrodinger.hat.show@gmail.com)
 
-Project Link: [https://github.com/Schrodinger-Hat/template](https://github.com/Schrodinger-Hat/template)
+Project Link: [https://github.com/Schrodinger-Hat/cog](https://github.com/Schrodinger-Hat/cog)
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 
-[contributors-shield]: https://img.shields.io/github/contributors/Schrodinger-Hat/template.svg?style=for-the-badge
-[contributors-url]: https://github.com/Schrodinger-Hat/template/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/Schrodinger-Hat/template.svg?style=for-the-badge
-[forks-url]: https://github.com/Schrodinger-Hat/template/network/members
-[stars-shield]: https://img.shields.io/github/stars/Schrodinger-Hat/template?style=for-the-badge
-[stars-url]: https://github.com/Schrodinger-Hat/template/stargazers
-[issues-shield]: https://img.shields.io/github/issues/Schrodinger-Hat/template.svg?style=for-the-badge
-[issues-url]: https://github.com/Schrodinger-Hat/template/issues
+[contributors-shield]: https://img.shields.io/github/contributors/Schrodinger-Hat/cog.svg?style=for-the-badge
+[contributors-url]: https://github.com/Schrodinger-Hat/cog/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/Schrodinger-Hat/cog.svg?style=for-the-badge
+[forks-url]: https://github.com/Schrodinger-Hat/cog/network/members
+[stars-shield]: https://img.shields.io/github/stars/Schrodinger-Hat/cog?style=for-the-badge
+[stars-url]: https://github.com/Schrodinger-Hat/cog/stargazers
+[issues-shield]: https://img.shields.io/github/issues/Schrodinger-Hat/cog.svg?style=for-the-badge
+[issues-url]: https://github.com/Schrodinger-Hat/cog/issues
 
