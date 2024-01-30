@@ -120,11 +120,19 @@ type createdIssueMsg string
 
 func parseAndCreate(issue utils.Issue) tea.Cmd {
 	// change with the creating of the issue
-	url := "https://api.github.com/repos/Wabri/tmp/issues"
+	url := "https://api.github.com/repos/" + githubUser + "/" + githubRepository + "/issues"
 
 	title := "\"title\":\"" + issue.Name + "\""
 	description := "\"body\":\"" + issue.Description + "\""
-	payload := []byte("{" + title + "," + description + "}")
+	labels := "\"labels\":["
+	for index, label := range issue.Labels {
+		labels += "\"" + label + "\""
+		if index < len(issue.Labels)-1 {
+			labels += ","
+		}
+	}
+	labels += "]"
+	payload := []byte("{" + title + "," + description + "," + labels + "}")
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(payload))
 	if err != nil {

@@ -4,11 +4,13 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
+	"strings"
 )
 
 type Issue struct {
 	Name        string
 	Description string
+	Labels      []string
 }
 
 func GetIssue(csvFilePath string) []Issue {
@@ -29,10 +31,16 @@ func GetIssue(csvFilePath string) []Issue {
 
 	var issues []Issue
 
-	for _, record := range records {
+	for _, record := range records[1:] {
 		issue := Issue{
 			Name:        record[0],
 			Description: record[1],
+		}
+
+		issue.Labels = strings.Split(record[2], ";")
+		if issue.Labels == nil {
+			fmt.Println("Error reading labels on csv")
+			return nil
 		}
 
 		issues = append(issues, issue)
