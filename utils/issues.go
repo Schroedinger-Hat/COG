@@ -33,18 +33,32 @@ func GetIssue(csvFilePath string) []Issue {
 
 	for _, record := range records[1:] {
 		issue := Issue{
-			Name:        record[0],
-			Description: record[1],
+			Name:        removeIfSpaceIsFirst(string(record[0])),
+			Description: removeIfSpaceIsFirst(string(record[1])),
 		}
 
-		issue.Labels = strings.Split(record[2], ";")
-		if issue.Labels == nil {
+		rawLabels := strings.Split(record[2], ";")
+		if rawLabels == nil {
 			fmt.Println("Error reading labels on csv")
 			return nil
+		}
+		for _, label := range rawLabels {
+			issue.Labels = append(issue.Labels, removeIfSpaceIsFirst(label))
 		}
 
 		issues = append(issues, issue)
 	}
 
 	return issues
+}
+
+func removeIfSpaceIsFirst(s string) string {
+	numberOfSpace := 0
+	for index := range s {
+		if !strings.HasPrefix(s[index:], " ") {
+			break
+		}
+		numberOfSpace += 1
+	}
+	return s[numberOfSpace:]
 }

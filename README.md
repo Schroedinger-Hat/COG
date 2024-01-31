@@ -68,9 +68,9 @@ go run main.go -csv <path-to-csv> -gh-user <user-repository> -gh-repository <rep
 The csv must have a similar structure of [this template](./template.csv):
 
 ```csv
-name, description, labels
-issue name, issue description, good first issue; bug; question
-another issue name, another issue description, question
+name,description,labels
+issue name,issue description,good first issue;bug;question
+another issue name,another issue description,question
 ```
 
 Is very important to split the labels with the separator *;* otherwise something unexpected might happen.
