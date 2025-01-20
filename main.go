@@ -26,10 +26,13 @@ type model struct {
 	done     bool
 }
 
-var csvFilePath string
-var githubUser string
-var githubRepository string
-var GHToken string
+var (
+	csvFilePath      string
+	csvCommaString   string
+	githubUser       string
+	githubRepository string
+	GHToken          string
+)
 
 var (
 	currentIssueNameStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("211"))
@@ -46,7 +49,7 @@ func newModel() model {
 	s := spinner.New()
 	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("63"))
 	return model{
-		issues:   utils.GetIssue(csvFilePath),
+		issues:   utils.GetIssue(csvFilePath, []rune(csvCommaString)[0]),
 		spinner:  s,
 		progress: p,
 	}
@@ -71,7 +74,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 
-		progressCmd := m.progress.SetPercent(float64(m.index) / float64(len(m.issues)-1))
+		progressCmd := m.progress.SetPercent(float64(m.index) / float64(len(m.issues)))
 
 		m.index++
 		return m, tea.Batch(
@@ -94,14 +97,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	n := len(m.issues) - 1
+	n := len(m.issues)
 	w := lipgloss.Width(fmt.Sprintf("%d", n))
 
 	if m.done {
 		return doneStyle.Render(fmt.Sprintf("Done! Created %d Issue.\n", n))
 	}
 
-	issuesCount := fmt.Sprintf(" %*d/%*d", w, m.index, w, n-1)
+	issuesCount := fmt.Sprintf(" %*d/%*d", w, m.index, w, n)
 
 	spin := m.spinner.View() + " "
 	prog := m.progress.View()
@@ -123,7 +126,9 @@ func parseAndCreate(issue utils.Issue) tea.Cmd {
 	url := "https://api.github.com/repos/" + githubUser + "/" + githubRepository + "/issues"
 
 	title := "\"title\":\"" + issue.Name + "\""
-	description := "\"body\":\"" + issue.Description + "\""
+	var body string = strings.ReplaceAll(issue.Description, "\n", "<br />")
+	body = strings.ReplaceAll(body, `"`, `\"`)
+	description := "\"body\":\"" + body + "\""
 	labels := "\"labels\":["
 	for index, label := range issue.Labels {
 		labels += "\"" + label + "\""
@@ -176,12 +181,16 @@ func main() {
 	GHToken = envGHTokenValue
 
 	flag.StringVar(&csvFilePath, "csv", "", "The path of the csv with all the infos about issues to create")
+	flag.StringVar(&csvCommaString, "csv-comma", "", "The comma used on the csv")
 	flag.StringVar(&githubUser, "gh-user", "", "The user of the repository where we want to create the issues")
 	flag.StringVar(&githubRepository, "gh-repository", "", "The repository where we want to create the issues")
 	flag.Parse()
 	if csvFilePath == "" || githubRepository == "" || githubUser == "" {
 		fmt.Println("Error: you must pass all the arguments!")
 		os.Exit(0)
+	}
+	if csvCommaString == "" {
+		csvCommaString = ","
 	}
 
 	if _, err := tea.NewProgram(newModel()).Run(); err != nil {

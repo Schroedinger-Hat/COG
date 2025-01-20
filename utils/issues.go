@@ -13,7 +13,7 @@ type Issue struct {
 	Labels      []string
 }
 
-func GetIssue(csvFilePath string) []Issue {
+func GetIssue(csvFilePath string, comma rune) []Issue {
 	file, err := os.Open(csvFilePath)
 	if err != nil {
 		fmt.Println("Error opening file:", err)
@@ -22,6 +22,7 @@ func GetIssue(csvFilePath string) []Issue {
 	defer file.Close()
 
 	reader := csv.NewReader(file)
+	reader.Comma = comma
 
 	records, err := reader.ReadAll()
 	if err != nil {
@@ -33,8 +34,8 @@ func GetIssue(csvFilePath string) []Issue {
 
 	for _, record := range records[1:] {
 		issue := Issue{
-			Name:        removeIfSpaceIsFirst(string(record[0])),
-			Description: removeIfSpaceIsFirst(string(record[1])),
+			Name:        strings.TrimSpace(string(record[0])),
+			Description: strings.TrimSpace(string(record[1])),
 		}
 
 		rawLabels := strings.Split(record[2], ";")
@@ -43,22 +44,11 @@ func GetIssue(csvFilePath string) []Issue {
 			return nil
 		}
 		for _, label := range rawLabels {
-			issue.Labels = append(issue.Labels, removeIfSpaceIsFirst(label))
+			issue.Labels = append(issue.Labels, strings.TrimSpace(label))
 		}
 
 		issues = append(issues, issue)
 	}
 
 	return issues
-}
-
-func removeIfSpaceIsFirst(s string) string {
-	numberOfSpace := 0
-	for index := range s {
-		if !strings.HasPrefix(s[index:], " ") {
-			break
-		}
-		numberOfSpace += 1
-	}
-	return s[numberOfSpace:]
 }
