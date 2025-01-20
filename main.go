@@ -126,7 +126,8 @@ func parseAndCreate(issue utils.Issue) tea.Cmd {
 	url := "https://api.github.com/repos/" + githubUser + "/" + githubRepository + "/issues"
 
 	title := "\"title\":\"" + issue.Name + "\""
-	var body string = strings.ReplaceAll(issue.Description, "\n", "<br />")
+	var body string
+	body = strings.ReplaceAll(issue.Description, "\n", "<br />")
 	body = strings.ReplaceAll(body, `"`, `\"`)
 	description := "\"body\":\"" + body + "\""
 	labels := "\"labels\":["

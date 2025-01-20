@@ -49,7 +49,7 @@
 
 This is a project that we use to automate issues creation for vote talks of [Open Source Day](osday.dev). We have the call for speakers on sessionize, where we can download a csv file with talk+speaker name and to let the community vote we need all of them into issues.
 
-The name *COG* is meant to lead back to the fact that this project is nothing more than a cog in a larger mechanism.
+The name _COG_ is meant to lead back to the fact that this project is nothing more than a cog in a larger mechanism.
 
 ### Tech stack
 
@@ -73,9 +73,27 @@ issue name,issue description,good first issue;bug;question
 another issue name,another issue description,question
 ```
 
-Is very important to split the labels with the separator *;* otherwise something unexpected might happen.
+Is very important to split the labels with the separator _;_ otherwise something unexpected might happen.
 
 Last thing, the most important one: you need a [Github Personal Access Token](https://github.com/settings/tokens) no specific scope are needed.
+
+### Particular cases
+
+If you have a description or title with commas or strange character that can conflict with the csv parsing we encourage you to change the csv value separator and run **COG** with the definition of the new comma separator:
+
+```bash
+go mod tidy
+export GHTOKEN=<your-token>
+go run main.go -csv <path-to-csv> -csv-comma <new_comma_separator> <path-to-csv> -gh-user <user-repository> -gh-repository <repository>
+```
+
+In most of our usage the new comma separator used is `|`, for this particular case the **COG** run will be:
+
+```bash
+go mod tidy
+export GHTOKEN=<your-token>
+go run main.go -csv template.csv -csv-comma "|" -gh-user test-user -gh-repository test-repository
+```
 
 ## Contributing
 
